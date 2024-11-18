@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Lis 12, 2024 at 05:59 PM
+-- Generation Time: Lis 19, 2024 at 12:21 AM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -140,9 +140,16 @@ CREATE TABLE `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`) VALUES
-(1, 'pbkdf2_sha256$600000$Pm1L210CIUkQagldrgD98o$eAODqNyNcK4KpG3LpGecn3aTmZ5yeqv+ImwgSZ9L5WY=', NULL, 1, 'admin', '', '', 'krzysztof.kubowicz.it@gmail.com', 1, 1, '2024-11-12 14:49:24.470841'),
-(2, 'pbkdf2_sha256$600000$qQK6OSgSIg89336g1rikm2$apU1Ry0+tHUZ7PaUs6KEGTrGjhzxjsj4K4Nt1Jr0vtc=', NULL, 0, 'user1', '', '', '', 0, 1, '2024-11-12 16:11:13.064990'),
-(3, 'pbkdf2_sha256$600000$WotFeBvHNPUyEPjS0G7Yxp$RsrHfXdOWTr43QOwGD+twcONaK5Pw/1K6cRJkRPIWe0=', NULL, 0, 'user2', '', '', '', 0, 1, '2024-11-12 16:11:27.968727');
+(1, '', NULL, 0, 'user1', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(2, '', NULL, 0, 'user2', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(3, '', NULL, 0, 'user3', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(4, '', NULL, 0, 'user4', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(5, '', NULL, 0, 'user5', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(6, '', NULL, 0, 'user6', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(7, '', NULL, 0, 'user7', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(8, '', NULL, 0, 'user8', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(9, '', NULL, 0, 'user9', '', '', '', 0, 1, '2024-11-19 00:11:02.000000'),
+(10, '', NULL, 0, 'user10', '', '', '', 0, 1, '2024-11-19 00:11:02.000000');
 
 -- --------------------------------------------------------
 
@@ -234,25 +241,25 @@ CREATE TABLE `django_migrations` (
 --
 
 INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
-(1, 'contenttypes', '0001_initial', '2024-11-12 14:47:04.331902'),
-(2, 'auth', '0001_initial', '2024-11-12 14:47:05.560911'),
-(3, 'admin', '0001_initial', '2024-11-12 14:47:05.906903'),
-(4, 'admin', '0002_logentry_remove_auto_add', '2024-11-12 14:47:05.914903'),
-(5, 'admin', '0003_logentry_add_action_flag_choices', '2024-11-12 14:47:05.921952'),
-(6, 'contenttypes', '0002_remove_content_type_name', '2024-11-12 14:47:06.051905'),
-(7, 'auth', '0002_alter_permission_name_max_length', '2024-11-12 14:47:06.200904'),
-(8, 'auth', '0003_alter_user_email_max_length', '2024-11-12 14:47:06.212911'),
-(9, 'auth', '0004_alter_user_username_opts', '2024-11-12 14:47:06.218902'),
-(10, 'auth', '0005_alter_user_last_login_null', '2024-11-12 14:47:06.303903'),
-(11, 'auth', '0006_require_contenttypes_0002', '2024-11-12 14:47:06.306903'),
-(12, 'auth', '0007_alter_validators_add_error_messages', '2024-11-12 14:47:06.313908'),
-(13, 'auth', '0008_alter_user_username_max_length', '2024-11-12 14:47:06.325908'),
-(14, 'auth', '0009_alter_user_last_name_max_length', '2024-11-12 14:47:06.339903'),
-(15, 'auth', '0010_alter_group_name_max_length', '2024-11-12 14:47:06.350906'),
-(16, 'auth', '0011_update_proxy_permissions', '2024-11-12 14:47:06.358903'),
-(17, 'auth', '0012_alter_user_first_name_max_length', '2024-11-12 14:47:06.370902'),
-(18, 'movies', '0001_initial', '2024-11-12 14:47:08.363906'),
-(19, 'sessions', '0001_initial', '2024-11-12 14:47:08.394903');
+(1, 'contenttypes', '0001_initial', '2024-11-18 23:09:51.118258'),
+(2, 'auth', '0001_initial', '2024-11-18 23:09:52.155105'),
+(3, 'admin', '0001_initial', '2024-11-18 23:09:52.453568'),
+(4, 'admin', '0002_logentry_remove_auto_add', '2024-11-18 23:09:52.461148'),
+(5, 'admin', '0003_logentry_add_action_flag_choices', '2024-11-18 23:09:52.468487'),
+(6, 'contenttypes', '0002_remove_content_type_name', '2024-11-18 23:09:52.565616'),
+(7, 'auth', '0002_alter_permission_name_max_length', '2024-11-18 23:09:52.708582'),
+(8, 'auth', '0003_alter_user_email_max_length', '2024-11-18 23:09:52.729616'),
+(9, 'auth', '0004_alter_user_username_opts', '2024-11-18 23:09:52.738582'),
+(10, 'auth', '0005_alter_user_last_login_null', '2024-11-18 23:09:52.814043'),
+(11, 'auth', '0006_require_contenttypes_0002', '2024-11-18 23:09:52.816041'),
+(12, 'auth', '0007_alter_validators_add_error_messages', '2024-11-18 23:09:52.823041'),
+(13, 'auth', '0008_alter_user_username_max_length', '2024-11-18 23:09:52.835075'),
+(14, 'auth', '0009_alter_user_last_name_max_length', '2024-11-18 23:09:52.846041'),
+(15, 'auth', '0010_alter_group_name_max_length', '2024-11-18 23:09:52.858042'),
+(16, 'auth', '0011_update_proxy_permissions', '2024-11-18 23:09:52.867649'),
+(17, 'auth', '0012_alter_user_first_name_max_length', '2024-11-18 23:09:52.879658'),
+(18, 'movies', '0001_initial', '2024-11-18 23:09:54.624399'),
+(19, 'sessions', '0001_initial', '2024-11-18 23:09:54.642433');
 
 -- --------------------------------------------------------
 
@@ -282,12 +289,46 @@ CREATE TABLE `movies_castmember` (
 --
 
 INSERT INTO `movies_castmember` (`id`, `name`) VALUES
-(1, 'Robert Downey Jr.'),
-(2, 'Chris Evans'),
-(3, 'Scarlett Johansson'),
-(4, 'Robert Downey Jr.'),
-(5, 'Chris Evans'),
-(6, 'Scarlett Johansson');
+(1, 'Adam Nowak'),
+(2, 'Anna Kowalska'),
+(3, 'Maria Wiśniewska'),
+(4, 'Tomasz Kaczmarek'),
+(5, 'Michał Lewandowski'),
+(6, 'Katarzyna Wójcik'),
+(7, 'Joanna Zielińska'),
+(8, 'Paweł Kamiński'),
+(9, 'Piotr Nowak'),
+(10, 'Agnieszka Nowicka'),
+(11, 'Łukasz Wiśniewski'),
+(12, 'Ewelina Kaczmarek'),
+(13, 'Mateusz Lewandowski'),
+(14, 'Justyna Wójcik'),
+(15, 'Marcin Kowalski'),
+(16, 'Anna Wiśniewska'),
+(17, 'Damian Nowak'),
+(18, 'Karolina Nowicka'),
+(19, 'Adrian Kaczmarek'),
+(20, 'Monika Kamińska'),
+(21, 'Szymon Kowalczyk'),
+(22, 'Alicja Zielińska'),
+(23, 'Bartosz Nowak'),
+(24, 'Katarzyna Nowakowska'),
+(25, 'Maciej Wiśniewski'),
+(26, 'Paulina Kowalska'),
+(27, 'Grzegorz Nowak'),
+(28, 'Agata Lewandowska'),
+(29, 'Filip Kowalski'),
+(30, 'Natalia Nowak'),
+(31, 'Rafał Kaczmarek'),
+(32, 'Joanna Zielińska'),
+(33, 'Kamil Wiśniewski'),
+(34, 'Magdalena Kowalska'),
+(35, 'Damian Kowalczyk'),
+(36, 'Aleksandra Nowicka'),
+(37, 'Łukasz Kaczmarek'),
+(38, 'Martyna Nowak'),
+(39, 'Robert Nowak'),
+(40, 'Ewa Kowalska');
 
 -- --------------------------------------------------------
 
@@ -305,10 +346,20 @@ CREATE TABLE `movies_director` (
 --
 
 INSERT INTO `movies_director` (`id`, `name`) VALUES
-(1, 'Christopher Nolan'),
-(2, 'Steven Spielberg'),
-(3, 'Christopher Nolan'),
-(4, 'Steven Spielberg');
+(1, 'Piotr Zieliński'),
+(2, 'Ewa Malinowska'),
+(3, 'Andrzej Nowicki'),
+(4, 'Monika Kwiatkowska'),
+(5, 'Krzysztof Kowalczyk'),
+(6, 'Anna Zielińska'),
+(7, 'Tomasz Nowicki'),
+(8, 'Piotr Kaczmarek'),
+(9, 'Ewa Lewandowska'),
+(10, 'Anna Kaczmarek'),
+(11, 'Monika Wiśniewska'),
+(12, 'Piotr Nowicki'),
+(13, 'Krzysztof Nowak'),
+(14, 'Tomasz Wiśniewski');
 
 -- --------------------------------------------------------
 
@@ -327,9 +378,26 @@ CREATE TABLE `movies_favoritemovie` (
 --
 
 INSERT INTO `movies_favoritemovie` (`id`, `movie_id`, `user_id`) VALUES
-(1, 4, 2),
-(2, 5, 2),
-(3, 6, 3);
+(1, 1, 1),
+(2, 3, 1),
+(3, 2, 2),
+(4, 4, 2),
+(5, 20, 3),
+(6, 3, 3),
+(7, 5, 4),
+(8, 6, 4),
+(9, 7, 5),
+(10, 8, 5),
+(11, 9, 6),
+(12, 10, 6),
+(13, 5, 7),
+(14, 20, 7),
+(15, 4, 8),
+(16, 2, 8),
+(17, 11, 9),
+(18, 7, 9),
+(19, 6, 10),
+(20, 9, 10);
 
 -- --------------------------------------------------------
 
@@ -347,12 +415,18 @@ CREATE TABLE `movies_genre` (
 --
 
 INSERT INTO `movies_genre` (`id`, `name`) VALUES
-(1, 'Akcja'),
-(2, 'Komedia'),
-(3, 'Dramat'),
-(4, 'Akcja'),
-(5, 'Komedia'),
-(6, 'Dramat');
+(1, 'Kryminał'),
+(2, 'Thriller'),
+(3, 'Romans'),
+(4, 'Dramat'),
+(5, 'Sci-Fi'),
+(6, 'Przygodowy'),
+(7, 'Fantasy'),
+(8, 'Akcja'),
+(9, 'Horror'),
+(10, 'Komedia'),
+(11, 'Sportowy'),
+(12, 'Familijny');
 
 -- --------------------------------------------------------
 
@@ -370,12 +444,55 @@ CREATE TABLE `movies_keyword` (
 --
 
 INSERT INTO `movies_keyword` (`id`, `name`) VALUES
-(1, 'Superbohater'),
-(2, 'Przyjaźń'),
-(3, 'Miłość'),
-(4, 'Superbohater'),
-(5, 'Przyjaźń'),
-(6, 'Miłość');
+(1, 'detektyw'),
+(2, 'tajemnica'),
+(3, 'przeszłość'),
+(4, 'miłość'),
+(5, 'podróż'),
+(6, 'Europa'),
+(7, 'kosmos'),
+(8, 'planeta'),
+(9, 'las'),
+(10, 'przygoda'),
+(11, 'przetrwanie'),
+(12, 'maszyny'),
+(13, 'walka'),
+(14, 'miasteczko'),
+(15, 'sekret'),
+(16, 'przyjaciele'),
+(17, 'Arktyka'),
+(18, 'przyroda'),
+(19, 'podróże w czasie'),
+(20, 'nauka'),
+(21, 'eksperyment'),
+(22, 'morze'),
+(23, 'przyjaźń'),
+(24, 'królestwo'),
+(25, 'wojownik'),
+(26, 'magia'),
+(27, 'powrót'),
+(28, 'rodzina'),
+(29, 'apokalipsa'),
+(30, 'muzyka'),
+(31, 'nadzieja'),
+(32, 'dżungla'),
+(33, 'cywilizacja'),
+(34, 'odkrycie'),
+(35, 'kultura'),
+(36, 'różnice'),
+(37, 'Afryka'),
+(38, 'dzieci'),
+(39, 'zemsta'),
+(40, 'sprawiedliwość'),
+(41, 'żołnierz'),
+(42, 'przyszłość'),
+(43, 'komunikacja'),
+(44, 'sport'),
+(45, 'drużyna'),
+(46, 'wygrana'),
+(47, 'wyspa'),
+(48, 'naukowcy'),
+(49, 'zjawiska');
 
 -- --------------------------------------------------------
 
@@ -396,12 +513,26 @@ CREATE TABLE `movies_movie` (
 --
 
 INSERT INTO `movies_movie` (`id`, `title`, `release_year`, `description`, `poster_url`) VALUES
-(1, 'Iron Man', 2008, 'Historia genialnego wynalazcy Tony\'ego Starka.', 'https://link_do_plakatu_iron_man.jpg'),
-(2, 'Avengers', 2012, 'Superbohaterowie łączą siły, by uratować świat.', 'https://link_do_plakatu_avengers.jpg'),
-(3, 'Forrest Gump', 1994, 'Opowieść o życiu Forresta Gumpa.', 'https://link_do_plakatu_forrest_gump.jpg'),
-(4, 'Iron Man', 2008, 'Historia genialnego wynalazcy Tony\'ego Starka.', 'https://link_do_plakatu_iron_man.jpg'),
-(5, 'Avengers', 2012, 'Superbohaterowie łączą siły, by uratować świat.', 'https://link_do_plakatu_avengers.jpg'),
-(6, 'Forrest Gump', 1994, 'Opowieść o życiu Forresta Gumpa.', 'https://link_do_plakatu_forrest_gump.jpg');
+(1, 'Cienie Przeszłości', 2010, 'Detektyw John Smith odkrywa tajemnice swojej przeszłości, które mogą zmienić jego przyszłość.', 'http://example.com/poster1.jpg'),
+(2, 'Wschód Słońca', 2012, 'Historia miłości, która rodzi się podczas podróży pociągiem przez Europę.', 'http://example.com/poster2.jpg'),
+(3, 'Gwiezdna Misja', 2015, 'Grupa astronautów wyrusza w podróż, by odkryć nową planetę zdolną do podtrzymania życia.', 'http://example.com/poster3.jpg'),
+(4, 'Tajemnice Lasu', 2018, 'Młoda biolog odkrywa tajemnicę skrywaną przez starożytny las.', 'http://example.com/poster4.jpg'),
+(5, 'Mroczne Sekrety', 2011, 'Grupa przyjaciół odkrywa mroczne tajemnice swojego rodzinnego miasta.', 'http://example.com/poster5.jpg'),
+(6, 'Zimowy Wiatr', 2013, 'Opowieść o przetrwaniu w surowych warunkach Arktyki.', 'http://example.com/poster6.jpg'),
+(7, 'Podróżnicy w Czasie', 2016, 'Naukowcy odkrywają sposób na podróżowanie w czasie, co prowadzi do nieoczekiwanych konsekwencji.', 'http://example.com/poster7.jpg'),
+(8, 'Morska Przygoda', 2014, 'Grupa przyjaciół wyrusza w rejs, który zamienia się w niesamowitą przygodę.', 'http://example.com/poster8.jpg'),
+(9, 'Królestwo Cieni', 2017, 'Młody wojownik musi ocalić swoje królestwo przed siłami ciemności.', 'http://example.com/poster9.jpg'),
+(10, 'Droga do Domu', 2019, 'Po latach podróży mężczyzna wraca do rodzinnego miasta, by zmierzyć się z przeszłością.', 'http://example.com/poster10.jpg'),
+(11, 'Dzień Sądu', 2011, 'Świat staje w obliczu zagłady, a grupa ludzi walczy o przetrwanie.', 'http://example.com/poster11.jpg'),
+(12, 'Światło w Ciemności', 2012, 'Niewidomy pianista odnajduje sens życia dzięki spotkaniu z tajemniczą kobietą.', 'http://example.com/poster12.jpg'),
+(13, 'Nieznane Ścieżki', 2015, 'Podróżnik odkrywa zaginioną cywilizację w sercu dżungli.', 'http://example.com/poster13.jpg'),
+(14, 'Bez Granic', 2013, 'Historia miłości pomiędzy dwojgiem ludzi z różnych kultur.', 'http://example.com/poster14.jpg'),
+(15, 'W Pustyni i w Puszczy', 2018, 'Dwoje dzieci przeżywa niesamowite przygody w Afryce.', 'http://example.com/poster15.jpg'),
+(16, 'Czas Zemsty', 2016, 'Były żołnierz szuka sprawiedliwości po tym, jak jego rodzina została skrzywdzona.', 'http://example.com/poster16.jpg'),
+(17, 'Echo Przyszłości', 2014, 'Naukowiec odkrywa sposób komunikacji z przyszłością.', 'http://example.com/poster17.jpg'),
+(18, 'Mistrzowie', 2017, 'Drużyna sportowa walczy o mistrzostwo, pokonując własne słabości.', 'http://example.com/poster18.jpg'),
+(19, 'Tajemnica Wyspy', 2019, 'Grupa naukowców odkrywa niezwykłe zjawiska na odległej wyspie.', 'http://example.com/poster19.jpg'),
+(20, 'Ostatni Bastion', 2021, 'Ostatnia grupa ludzi walczy o przetrwanie w świecie opanowanym przez maszyny.', 'http://example.com/poster20.jpg');
 
 -- --------------------------------------------------------
 
@@ -421,13 +552,45 @@ CREATE TABLE `movies_movie_cast` (
 
 INSERT INTO `movies_movie_cast` (`id`, `movie_id`, `castmember_id`) VALUES
 (1, 1, 1),
-(2, 2, 1),
-(3, 2, 2),
-(4, 2, 3),
-(5, 4, 4),
-(6, 5, 4),
-(7, 5, 5),
-(8, 5, 6);
+(2, 1, 2),
+(3, 2, 3),
+(4, 2, 4),
+(5, 3, 5),
+(6, 3, 6),
+(7, 4, 7),
+(8, 4, 8),
+(9, 5, 9),
+(10, 5, 10),
+(11, 6, 11),
+(12, 6, 12),
+(13, 7, 13),
+(14, 7, 14),
+(15, 8, 15),
+(16, 8, 16),
+(17, 9, 17),
+(18, 9, 18),
+(19, 10, 19),
+(20, 10, 20),
+(21, 11, 21),
+(22, 11, 22),
+(23, 12, 23),
+(24, 12, 24),
+(25, 13, 25),
+(26, 13, 26),
+(27, 14, 27),
+(28, 14, 28),
+(29, 15, 29),
+(30, 15, 30),
+(31, 16, 31),
+(32, 16, 32),
+(33, 17, 33),
+(34, 17, 34),
+(35, 18, 35),
+(36, 18, 36),
+(37, 19, 37),
+(38, 19, 38),
+(39, 20, 39),
+(40, 20, 40);
 
 -- --------------------------------------------------------
 
@@ -446,10 +609,26 @@ CREATE TABLE `movies_movie_directors` (
 --
 
 INSERT INTO `movies_movie_directors` (`id`, `movie_id`, `director_id`) VALUES
-(1, 1, 2),
-(2, 3, 1),
-(3, 4, 4),
-(4, 6, 3);
+(1, 1, 1),
+(2, 2, 2),
+(3, 3, 3),
+(4, 4, 4),
+(5, 5, 5),
+(6, 6, 6),
+(7, 7, 7),
+(8, 8, 8),
+(9, 9, 9),
+(10, 10, 10),
+(11, 11, 5),
+(12, 12, 6),
+(13, 13, 7),
+(14, 14, 8),
+(15, 15, 9),
+(16, 16, 11),
+(17, 17, 12),
+(18, 18, 9),
+(19, 19, 13),
+(20, 20, 5);
 
 -- --------------------------------------------------------
 
@@ -469,11 +648,45 @@ CREATE TABLE `movies_movie_genres` (
 
 INSERT INTO `movies_movie_genres` (`id`, `movie_id`, `genre_id`) VALUES
 (1, 1, 1),
-(2, 2, 1),
-(3, 3, 3),
-(4, 4, 4),
-(5, 5, 4),
-(6, 6, 6);
+(2, 1, 2),
+(3, 2, 3),
+(4, 2, 4),
+(5, 3, 5),
+(6, 3, 6),
+(8, 4, 6),
+(7, 4, 7),
+(10, 5, 2),
+(9, 5, 9),
+(11, 6, 4),
+(12, 6, 6),
+(14, 7, 2),
+(13, 7, 5),
+(15, 8, 6),
+(16, 8, 10),
+(17, 9, 7),
+(18, 9, 8),
+(20, 10, 3),
+(19, 10, 4),
+(22, 11, 5),
+(21, 11, 8),
+(24, 12, 3),
+(23, 12, 4),
+(25, 13, 6),
+(26, 13, 7),
+(28, 14, 3),
+(27, 14, 4),
+(29, 15, 6),
+(30, 15, 12),
+(32, 16, 2),
+(31, 16, 8),
+(34, 17, 2),
+(33, 17, 5),
+(35, 18, 4),
+(36, 18, 11),
+(38, 19, 5),
+(37, 19, 6),
+(40, 20, 5),
+(39, 20, 8);
 
 -- --------------------------------------------------------
 
@@ -493,15 +706,65 @@ CREATE TABLE `movies_movie_keywords` (
 
 INSERT INTO `movies_movie_keywords` (`id`, `movie_id`, `keyword_id`) VALUES
 (1, 1, 1),
-(2, 2, 1),
-(3, 2, 2),
-(4, 3, 2),
-(5, 3, 3),
-(6, 4, 4),
-(7, 5, 4),
-(8, 5, 5),
-(9, 6, 5),
-(10, 6, 6);
+(2, 1, 2),
+(3, 1, 3),
+(4, 2, 4),
+(5, 2, 5),
+(6, 2, 6),
+(8, 3, 5),
+(7, 3, 7),
+(9, 3, 8),
+(11, 4, 2),
+(10, 4, 9),
+(12, 4, 10),
+(13, 5, 14),
+(14, 5, 15),
+(15, 5, 16),
+(16, 6, 11),
+(17, 6, 17),
+(18, 6, 18),
+(19, 7, 19),
+(20, 7, 20),
+(21, 7, 21),
+(23, 8, 5),
+(22, 8, 22),
+(24, 8, 23),
+(25, 9, 24),
+(26, 9, 25),
+(27, 9, 26),
+(30, 10, 3),
+(28, 10, 27),
+(29, 10, 28),
+(32, 11, 11),
+(33, 11, 13),
+(31, 11, 29),
+(35, 12, 4),
+(34, 12, 30),
+(36, 12, 31),
+(37, 13, 32),
+(38, 13, 33),
+(39, 13, 34),
+(40, 14, 4),
+(41, 14, 35),
+(42, 14, 36),
+(45, 15, 10),
+(43, 15, 37),
+(44, 15, 38),
+(46, 16, 39),
+(47, 16, 40),
+(48, 16, 41),
+(51, 17, 20),
+(49, 17, 42),
+(50, 17, 43),
+(52, 18, 44),
+(53, 18, 45),
+(54, 18, 46),
+(55, 19, 47),
+(56, 19, 48),
+(57, 19, 49),
+(58, 20, 11),
+(59, 20, 12),
+(60, 20, 13);
 
 -- --------------------------------------------------------
 
@@ -523,9 +786,26 @@ CREATE TABLE `movies_rating` (
 --
 
 INSERT INTO `movies_rating` (`id`, `score`, `comment`, `timestamp`, `movie_id`, `user_id`) VALUES
-(4, 5, 'Świetny film!', '2024-11-12 16:12:55.569036', 4, 2),
-(5, 4, 'Bardzo dobry, ale mógł być lepszy.', '2024-11-12 16:12:55.585567', 5, 2),
-(6, 5, 'Klasyk!', '2024-11-12 16:12:55.590570', 6, 3);
+(1, 8, 'Bardzo dobry film!', '2024-11-19 00:11:03.000000', 1, 1),
+(2, 9, 'Świetne efekty specjalne.', '2024-11-19 00:11:03.000000', 3, 1),
+(3, 7, 'Piękna historia.', '2024-11-19 00:11:03.000000', 2, 2),
+(4, 8, 'Uwielbiam takie klimaty.', '2024-11-19 00:11:03.000000', 4, 2),
+(5, 9, 'Trzyma w napięciu.', '2024-11-19 00:11:03.000000', 20, 3),
+(6, 8, 'Bardzo ciekawy.', '2024-11-19 00:11:03.000000', 3, 3),
+(7, 7, 'Dreszczyk emocji.', '2024-11-19 00:11:03.000000', 5, 4),
+(8, 8, 'Piękne krajobrazy.', '2024-11-19 00:11:03.000000', 6, 4),
+(9, 8, 'Intrygująca fabuła.', '2024-11-19 00:11:03.000000', 7, 5),
+(10, 7, 'Dużo humoru.', '2024-11-19 00:11:03.000000', 8, 5),
+(11, 9, 'Epicki film.', '2024-11-19 00:11:03.000000', 9, 6),
+(12, 8, 'Wzruszający.', '2024-11-19 00:11:03.000000', 10, 6),
+(13, 8, 'Polecam!', '2024-11-19 00:11:03.000000', 5, 7),
+(14, 9, 'Świetna akcja.', '2024-11-19 00:11:03.000000', 20, 7),
+(15, 9, 'Magiczny klimat.', '2024-11-19 00:11:03.000000', 4, 8),
+(16, 8, 'Romantyczny.', '2024-11-19 00:11:03.000000', 2, 8),
+(17, 8, 'Intensywny.', '2024-11-19 00:11:03.000000', 11, 9),
+(18, 9, 'Zaskakujący.', '2024-11-19 00:11:03.000000', 7, 9),
+(19, 9, 'Piękna historia.', '2024-11-19 00:11:03.000000', 6, 10),
+(20, 9, 'Niesamowity świat.', '2024-11-19 00:11:03.000000', 9, 10);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -708,7 +988,7 @@ ALTER TABLE `auth_permission`
 -- AUTO_INCREMENT for table `auth_user`
 --
 ALTER TABLE `auth_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `auth_user_groups`
@@ -744,67 +1024,67 @@ ALTER TABLE `django_migrations`
 -- AUTO_INCREMENT for table `movies_castmember`
 --
 ALTER TABLE `movies_castmember`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `movies_director`
 --
 ALTER TABLE `movies_director`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `movies_favoritemovie`
 --
 ALTER TABLE `movies_favoritemovie`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `movies_genre`
 --
 ALTER TABLE `movies_genre`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `movies_keyword`
 --
 ALTER TABLE `movies_keyword`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `movies_movie`
 --
 ALTER TABLE `movies_movie`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `movies_movie_cast`
 --
 ALTER TABLE `movies_movie_cast`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `movies_movie_directors`
 --
 ALTER TABLE `movies_movie_directors`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `movies_movie_genres`
 --
 ALTER TABLE `movies_movie_genres`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `movies_movie_keywords`
 --
 ALTER TABLE `movies_movie_keywords`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `movies_rating`
 --
 ALTER TABLE `movies_rating`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Constraints for dumped tables
