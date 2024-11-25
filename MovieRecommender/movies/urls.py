@@ -1,12 +1,14 @@
-from django.urls import path, include
-from rest_framework import routers
-from .views import MovieViewSet, RatingViewSet, recommend_movies
+# movies/urls.py
 
-router = routers.DefaultRouter()
-router.register(r'movies', MovieViewSet)
-router.register(r'ratings', RatingViewSet)
+from django.urls import path
+from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('recommend/', recommend_movies),
+    path('', views.home, name='home'),
+    path('register/', views.register, name='register'),
+    path('guest_recommendations/', views.guest_recommendations, name='guest_recommendations'),
+    path('user_recommendations/', views.user_recommendations, name='user_recommendations'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

@@ -1,0 +1,15 @@
+<!-- movies/templates/guest_recommendations.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Rekomendacje dla Ciebie</h2>
+    <div class="movie-grid">
+        {% for movie in recommendations %}
+            <div class="movie-card">
+                <div class="poster-placeholder"></div>
+                <h3>{{ movie.title }}</h3>
+                <p>Rok wydania: {{ movie.release_year }}</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

@@ -1,27 +1,61 @@
-from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
+# movies/views.py
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Count
 from .models import Movie, Rating
-from .serializers import MovieSerializer, RatingSerializer
-from .recommendations import knn_recommendation, matrix_factorization_recommendation
+from .forms import UserRegisterForm
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def recommend_movies(request):
-    user = request.user
-    if user.is_authenticated:
-        recommendations = matrix_factorization_recommendation(user.id)
+def home(request):
+    # 5 najpopularniejszych filmów
+    popular_movies = Movie.objects.annotate(avg_rating=Avg('rating__score')).order_by('-avg_rating')[:5]
+
+    # 5 najnowszych filmów
+    newest_movies = Movie.objects.all().order_by('-release_year')[:5]
+
+    # 5 najczęściej ocenianych filmów
+    most_rated_movies = Movie.objects.annotate(rating_count=Count('rating')).order_by('-rating_count')[:5]
+
+    context = {
+        'popular_movies': popular_movies,
+        'newest_movies': newest_movies,
+        'most_rated_movies': most_rated_movies,
+    }
+
+    return render(request, 'home.html', context)
+
+def guest_recommendations(request):
+    from .recommendations import knn_recommendation
+    recommendations = knn_recommendation()
+
+    context = {
+        'recommendations': recommendations
+    }
+
+    return render(request, 'guest_recommendations.html', context)
+
+@login_required
+def user_recommendations(request):
+    from .recommendations import recommend_movies_for_user
+    recommendations = recommend_movies_for_user(request.user)
+
+    context = {
+        'recommendations': recommendations
+    }
+
+    return render(request, 'user_recommendations.html', context)
+
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Konto zostało utworzone dla {username}! Możesz się teraz zalogować.')
+            login(request, user)
+            return redirect('home')
     else:
-        recommendations = knn_recommendation()
-    serializer = MovieSerializer(recommendations, many=True)
-    return Response(serializer.data)
-
-class MovieViewSet(viewsets.ModelViewSet):
-    queryset = Movie.objects.all()
-    serializer_class = MovieSerializer
-
-class RatingViewSet(viewsets.ModelViewSet):
-    queryset = Rating.objects.all()
-    serializer_class = RatingSerializer
+        form = UserRegisterForm()
+    return render(request, 'register.html', {'form': form})

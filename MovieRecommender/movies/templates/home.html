@@ -1,0 +1,43 @@
+<!-- movies/templates/home.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Najpopularniejsze filmy</h2>
+    <div class="movie-grid">
+        {% for movie in popular_movies %}
+            <div class="movie-card">
+                <div class="poster-placeholder"></div>
+                <h3>{{ movie.title }}</h3>
+                <p>Średnia ocena: {{ movie.avg_rating|default:"Brak ocen" }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Najnowsze filmy</h2>
+    <div class="movie-grid">
+        {% for movie in newest_movies %}
+            <div class="movie-card">
+                <div class="poster-placeholder"></div>
+                <h3>{{ movie.title }}</h3>
+                <p>Rok wydania: {{ movie.release_year }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Najczęściej oceniane filmy</h2>
+    <div class="movie-grid">
+        {% for movie in most_rated_movies %}
+            <div class="movie-card">
+                <div class="poster-placeholder"></div>
+                <h3>{{ movie.title }}</h3>
+                <p>Liczba ocen: {{ movie.rating_count }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if not user.is_authenticated %}
+        <div class="recommendation-button">
+            <a href="{% url 'guest_recommendations' %}" class="btn">Zobacz rekomendacje</a>
+        </div>
+    {% endif %}
+{% endblock content %}

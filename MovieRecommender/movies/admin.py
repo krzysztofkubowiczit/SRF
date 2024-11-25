@@ -1,3 +1,12 @@
-from django.contrib import admin
+# movies/admin.py
 
-# Register your models here.
+from django.contrib import admin
+from .models import Genre, Keyword, CastMember, Director, Movie, Rating, FavoriteMovie
+
+admin.site.register(Genre)
+admin.site.register(Keyword)
+admin.site.register(CastMember)
+admin.site.register(Director)
+admin.site.register(Movie)
+admin.site.register(Rating)
+admin.site.register(FavoriteMovie)
