@@ -19,8 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'movies', 'static')]
 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'movies', 'static')]
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 

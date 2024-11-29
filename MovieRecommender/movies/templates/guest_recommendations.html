@@ -1,5 +1,6 @@
 <!-- movies/templates/guest_recommendations.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <h2>Rekomendacje dla Ciebie</h2>
@@ -7,9 +8,22 @@
         {% for movie in recommendations %}
             <div class="movie-card">
                 <div class="poster-placeholder"></div>
-                <h3>{{ movie.title }}</h3>
-                <p>Rok wydania: {{ movie.release_year }}</p>
+                <div class="card-body">
+                    <h5>{{ movie.title }}</h5>
+                    <p>Rok wydania: {{ movie.release_year }}</p>
+                    <!-- Nie pozwalamy na indywidualne ocenianie filmów -->
+                </div>
             </div>
         {% endfor %}
     </div>
+
+    <h3>Oceń rekomendacje</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="score">Twoja ocena (1-10):</label>
+            <input type="number" name="score" id="score" min="1" max="10" required class="form-control">
+        </div>
+        <button type="submit" class="btn-primary">Wyślij ocenę</button>
+    </form>
 {% endblock content %}

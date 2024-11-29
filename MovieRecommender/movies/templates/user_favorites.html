@@ -1,0 +1,16 @@
+<!-- movies/templates/user_favorites.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>Twoje ulubione filmy</h2>
+    <ul class="list-group">
+        {% for favorite in favorites %}
+            <li class="list-group-item">
+                <a href="{% url 'movie_detail' favorite.movie.id %}">{{ favorite.movie.title }}</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Nie masz żadnych ulubionych filmów.</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

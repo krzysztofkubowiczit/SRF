@@ -1,15 +1,48 @@
 <!-- movies/templates/user_recommendations.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <h2>Twoje rekomendacje</h2>
-    <div class="movie-grid">
-        {% for movie in recommendations %}
-            <div class="movie-card">
-                <div class="poster-placeholder"></div>
-                <h3>{{ movie.title }}</h3>
-                <p>Rok wydania: {{ movie.release_year }}</p>
-            </div>
-        {% endfor %}
-    </div>
+    <h2>Rekomendacje dla Ciebie</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="movie-grid">
+            {% for movie in recommendations %}
+                <div class="movie-card">
+                    {% if movie.poster_url %}
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.title }} Poster" class="poster-image">
+                    {% else %}
+                        <div class="poster-placeholder"></div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5>{{ movie.title }}</h5>
+                        <p>Rok wydania: {{ movie.release_year }}</p>
+                        <a href="{% url 'movie_detail' movie.id %}" class="btn-primary">Szczegóły</a>
+
+                        <!-- Formularz dodania oceny indywidualnej (opcjonalne) -->
+                        <div class="form-group">
+                            <label for="score_{{ movie.id }}">Ocena (1-10):</label>
+                            <input type="number" name="score_{{ movie.id }}" id="score_{{ movie.id }}" min="1" max="10" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="comment_{{ movie.id }}">Komentarz (opcjonalnie):</label>
+                            <textarea name="comment_{{ movie.id }}" id="comment_{{ movie.id }}" class="form-control"></textarea>
+                        </div>
+                        <!-- Opcja dodania do ulubionych -->
+                        <div class="form-group">
+                            <input type="checkbox" name="favorite_{{ movie.id }}" id="favorite_{{ movie.id }}">
+                            <label for="favorite_{{ movie.id }}">Dodaj do ulubionych</label>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <h3>Oceń rekomendacje</h3>
+        <div class="form-group">
+            <label for="score">Twoja ocena (1-10):</label>
+            <input type="number" name="score" id="score" min="1" max="10" required class="form-control">
+        </div>
+        <button type="submit" class="btn-primary">Wyślij oceny</button>
+    </form>
 {% endblock content %}

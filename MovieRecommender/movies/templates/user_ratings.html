@@ -1,0 +1,17 @@
+<!-- movies/templates/user_ratings.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>Twoje oceny</h2>
+    <ul class="list-group">
+        {% for rating in ratings %}
+            <li class="list-group-item">
+                <strong><a href="{% url 'movie_detail' rating.movie.id %}">{{ rating.movie.title }}</a></strong> - {{ rating.score }}/10
+                {% if rating.comment %}
+                    <p>Komentarz: {{ rating.comment }}</p>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

@@ -1,26 +1,30 @@
 <!-- movies/templates/movie_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ movie.title }}</title>
-</head>
-<body>
-    <h1>{{ movie.title }}</h1>
-    <p>Rok wydania: {{ movie.release_year }}</p>
-    <p>Opis: {{ movie.description }}</p>
-    <p>Gatunki: {{ movie.genres.all|join:", " }}</p>
-    <p>Obsada: {{ movie.cast.all|join:", " }}</p>
-    <p>Reżyserzy: {{ movie.directors.all|join:", " }}</p>
-    <p>Średnia ocena: {{ avg_rating }}</p>
+{% block content %}
+    <div class="movie-detail">
+        {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }} Poster" class="poster-image-large">
+        {% else %}
+            <div class="poster-placeholder-large"></div>
+        {% endif %}
+        <div class="movie-info">
+            <h2>{{ movie.title }}</h2>
+            <p><strong>Rok wydania:</strong> {{ movie.release_year }}</p>
+            <p><strong>Średnia ocena:</strong> {{ avg_rating|default:"Brak ocen" }}</p>
+            <p><strong>Opis:</strong> {{ movie.description|default:"Brak opisu" }}</p>
+            <!-- Możesz dodać więcej informacji, takich jak gatunki, obsada itp. -->
+        </div>
+    </div>
 
-    <h2>Oceny</h2>
-    <ul>
-        {% for rating in ratings %}
-            <li>{{ rating.user.username }}: {{ rating.score }}/10</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+    <h3>Oceny użytkowników</h3>
+    {% for rating in ratings %}
+        <div class="rating">
+            <p><strong>{{ rating.user.username }}</strong> ocenił na <strong>{{ rating.score }}</strong></p>
+            <p>{{ rating.comment }}</p>
+        </div>
+    {% empty %}
+        <p>Brak ocen dla tego filmu.</p>
+    {% endfor %}
+{% endblock content %}

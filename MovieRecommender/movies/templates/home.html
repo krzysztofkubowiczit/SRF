@@ -1,14 +1,33 @@
 <!-- movies/templates/home.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <h2>Najpopularniejsze filmy</h2>
+
+    {% if user.is_authenticated %}
+        <div class="recommendation-button">
+            <a href="{% url 'user_recommendations' %}" class="btn-primary">Poleć filmy</a>
+        </div>
+    {% else %}
+        <div class="recommendation-button">
+            <a href="{% url 'guest_recommendations' %}" class="btn-primary">Poleć filmy</a>
+        </div>
+    {% endif %}
+
+    <h2>Najlepiej oceniane filmy</h2>
     <div class="movie-grid">
-        {% for movie in popular_movies %}
+        {% for movie in top_rated_movies %}
             <div class="movie-card">
-                <div class="poster-placeholder"></div>
-                <h3>{{ movie.title }}</h3>
-                <p>Średnia ocena: {{ movie.avg_rating|default:"Brak ocen" }}</p>
+                {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }} Poster" class="poster-image">
+                {% else %}
+                    <div class="poster-placeholder"></div>
+                {% endif %}
+                <div class="card-body">
+                    <h5>{{ movie.title }}</h5>
+                    <p>Średnia ocena: {{ movie.avg_rating|default:"Brak ocen" }}</p>
+                    <a href="{% url 'movie_detail' movie.id %}" class="btn-primary">Szczegóły</a>
+                </div>
             </div>
         {% endfor %}
     </div>
@@ -17,9 +36,16 @@
     <div class="movie-grid">
         {% for movie in newest_movies %}
             <div class="movie-card">
-                <div class="poster-placeholder"></div>
-                <h3>{{ movie.title }}</h3>
-                <p>Rok wydania: {{ movie.release_year }}</p>
+                {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }} Poster" class="poster-image">
+                {% else %}
+                    <div class="poster-placeholder"></div>
+                {% endif %}
+                <div class="card-body">
+                    <h5>{{ movie.title }}</h5>
+                    <p>Rok wydania: {{ movie.release_year }}</p>
+                    <a href="{% url 'movie_detail' movie.id %}" class="btn-primary">Szczegóły</a>
+                </div>
             </div>
         {% endfor %}
     </div>
@@ -28,16 +54,18 @@
     <div class="movie-grid">
         {% for movie in most_rated_movies %}
             <div class="movie-card">
-                <div class="poster-placeholder"></div>
-                <h3>{{ movie.title }}</h3>
-                <p>Liczba ocen: {{ movie.rating_count }}</p>
+                {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }} Poster" class="poster-image">
+                {% else %}
+                    <div class="poster-placeholder"></div>
+                {% endif %}
+                <div class="card-body">
+                    <h5>{{ movie.title }}</h5>
+                    <p>Liczba ocen: {{ movie.rating_count }}</p>
+                    <a href="{% url 'movie_detail' movie.id %}" class="btn-primary">Szczegóły</a>
+                </div>
             </div>
         {% endfor %}
     </div>
 
-    {% if not user.is_authenticated %}
-        <div class="recommendation-button">
-            <a href="{% url 'guest_recommendations' %}" class="btn">Zobacz rekomendacje</a>
-        </div>
-    {% endif %}
 {% endblock content %}

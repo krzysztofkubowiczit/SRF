@@ -1,0 +1,11 @@
+<!-- movies/templates/add_to_favorites.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>Dodawanie "{{ movie.title }}" do Ulubionych</h2>
+    <form method="post" action="{% url 'add_to_favorites' movie.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">Dodaj do ulubionych</button>
+    </form>
+{% endblock content %}

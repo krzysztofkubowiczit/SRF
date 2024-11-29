@@ -1,8 +1,16 @@
+# movies/recommendations.py
+
 import os
 import sys
 import django
+import json
+import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import linear_kernel
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
 
-# Ścieżki
+# Ścieżki do plików modelu
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))  # .../MovieRecommender/movies
 PARENT_DIR = os.path.dirname(CURRENT_DIR)                 # .../MovieRecommender
 
@@ -13,23 +21,10 @@ sys.path.insert(0, PARENT_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MovieRecommender.settings')
 django.setup()
 
-# Importy
-from movies.models import Movie, Genre, Keyword, Rating, FavoriteMovie
+# Importy modeli Django
+from movies.models import Movie, Rating, FavoriteMovie, RecommendationFeedback
 from django.contrib.auth.models import User
 from django.db.models import Avg, Count
-import numpy as np
-import pandas as pd
-import csv
-import json  # Do zapisu mapowań w formacie JSON
-from sklearn.metrics.pairwise import cosine_similarity, linear_kernel
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.neighbors import NearestNeighbors
-
-# Ścieżki do plików modelu
-MODEL_USER_FACTORS_PATH = os.path.join(CURRENT_DIR, 'user_factors.csv')
-MODEL_MOVIE_FACTORS_PATH = os.path.join(CURRENT_DIR, 'movie_factors.csv')
-MODEL_MAPPINGS_PATH = os.path.join(CURRENT_DIR, 'model_mappings.json')
-MODEL_NEW_RATINGS_COUNT_PATH = os.path.join(CURRENT_DIR, 'new_ratings_count.txt')
 
 # Parametry modelu
 LATENT_FEATURES = 10
@@ -40,27 +35,20 @@ EPOCHS = 20
 # Licznik nowych ocen od ostatniego retrenowania
 NEW_RATINGS_THRESHOLD = 50
 
-# Funkcje do zarządzania licznikiem nowych ocen
-def get_new_ratings_count():
-    if os.path.exists(MODEL_NEW_RATINGS_COUNT_PATH):
-        with open(MODEL_NEW_RATINGS_COUNT_PATH, 'r') as f:
-            count = int(f.read())
-            return count
-    else:
-        return 0
+# Ścieżki do plików modelu
+MODEL_USER_FACTORS_PATH = os.path.join(CURRENT_DIR, 'user_factors.csv')
+MODEL_MOVIE_FACTORS_PATH = os.path.join(CURRENT_DIR, 'movie_factors.csv')
+MODEL_MAPPINGS_PATH = os.path.join(CURRENT_DIR, 'model_mappings.json')
+MODEL_NEW_RATINGS_COUNT_PATH = os.path.join(CURRENT_DIR, 'new_ratings_count.txt')
 
-def increment_new_ratings_count():
-    count = get_new_ratings_count() + 1
-    with open(MODEL_NEW_RATINGS_COUNT_PATH, 'w') as f:
-        f.write(str(count))
-    return count
+# -------------------------- #
+#   Funkcje Rekomendacji     #
+# -------------------------- #
 
-def reset_new_ratings_count():
-    with open(MODEL_NEW_RATINGS_COUNT_PATH, 'w') as f:
-        f.write('0')
-
-# Funkcje rekomendacji
 def get_movie_features(movie):
+    """
+    Pobiera cechy filmu jako połączony string z gatunków, słów kluczowych, obsady i reżyserów.
+    """
     genres = ' '.join([genre.name for genre in movie.genres.all()])
     keywords = ' '.join([keyword.name for keyword in movie.keywords.all()])
     cast = ' '.join([member.name for member in movie.cast.all()])
@@ -68,11 +56,15 @@ def get_movie_features(movie):
     return f"{genres} {keywords} {cast} {directors}"
 
 def knn_recommendation():
+    """
+    Generuje rekomendacje dla gości (niezalogowanych użytkowników) za pomocą algorytmu KNN opartego na treści.
+    Zwraca listę obiektów Movie.
+    """
     all_movies = Movie.objects.all()
     if not all_movies.exists():
-        print("Brak filmów w bazie danych.")
         return []
 
+    # Tworzenie DataFrame z filmami
     movies_df = pd.DataFrame(list(all_movies.values('id', 'title', 'description')))
 
     # Dodaj kolumnę z cechami
@@ -90,22 +82,28 @@ def knn_recommendation():
 
     # Wybierz losowy film i znajdź 5 najbliższych sąsiadów
     random_idx = np.random.choice(movies_df.index)
-    distances, indices = knn.kneighbors(tfidf_matrix[random_idx], n_neighbors=6)
+    distances, indices = knn.kneighbors(tfidf_matrix[random_idx], n_neighbors=6)  # 6, bo pierwszy to sam film
+
     recommendations = []
     for idx in indices.flatten():
         if idx != random_idx:
             movie_id = movies_df.iloc[idx]['id']
             movie = Movie.objects.get(id=movie_id)
             recommendations.append(movie)
-    return recommendations
+    return recommendations[:5]
 
 def train_matrix_factorization_model():
-    # Pobierz oceny użytkowników
+    """
+    Trenuje model filtracji kolaboratywnej (matrix factorization) na podstawie ocen użytkowników.
+    Zapisuje wektory czynników użytkowników i filmów oraz mapowania ID do indeksów.
+    """
+    # Pobierz wszystkie oceny użytkowników
     ratings = Rating.objects.all()
     if not ratings.exists():
         print("Brak ocen w bazie danych.")
         return None
 
+    # Tworzenie DataFrame z ocenami
     ratings_df = pd.DataFrame(list(ratings.values('user_id', 'movie_id', 'score')))
 
     # Mapowanie ID użytkowników i filmów na indeksy
@@ -165,11 +163,20 @@ def train_matrix_factorization_model():
     with open(MODEL_MAPPINGS_PATH, 'w') as f:
         json.dump(model_mappings, f)
 
+    # Reset licznika nowych ocen
+    reset_new_ratings_count()
+
     print("Model został zapisany do plików CSV i JSON.")
-    reset_new_ratings_count()  # Reset licznika nowych ocen
 
 def load_matrix_factorization_model():
-    if not os.path.exists(MODEL_USER_FACTORS_PATH) or not os.path.exists(MODEL_MOVIE_FACTORS_PATH) or not os.path.exists(MODEL_MAPPINGS_PATH):
+    """
+    Ładuje model filtracji kolaboratywnej z plików CSV i JSON.
+    Jeśli pliki nie istnieją, trenuje model.
+    Zwraca słownik zawierający wektory użytkowników i filmów oraz mapowania ID do indeksów.
+    """
+    if not (os.path.exists(MODEL_USER_FACTORS_PATH) and
+            os.path.exists(MODEL_MOVIE_FACTORS_PATH) and
+            os.path.exists(MODEL_MAPPINGS_PATH)):
         print("Model nie istnieje. Rozpoczynam trening.")
         train_matrix_factorization_model()
 
@@ -194,6 +201,10 @@ def load_matrix_factorization_model():
     return model_data
 
 def matrix_factorization_recommendation(user_id):
+    """
+    Generuje rekomendacje dla zalogowanego użytkownika na podstawie filtracji kolaboratywnej.
+    Zwraca listę obiektów Movie.
+    """
     try:
         model_data = load_matrix_factorization_model()
         user_factors = model_data['user_factors']
@@ -203,7 +214,7 @@ def matrix_factorization_recommendation(user_id):
         index_to_movie_id = model_data['index_to_movie_id']
 
         if user_id not in user_id_to_index:
-            print("Użytkownik nie ma żadnych ocen.")
+            # Użytkownik nie ma żadnych ocen
             return []
 
         user_idx = user_id_to_index[user_id]
@@ -226,17 +237,146 @@ def matrix_factorization_recommendation(user_id):
             if len(recommendations) >= 5:
                 break
 
-        if not recommendations:
-            print("Brak rekomendacji dla tego użytkownika.")
-            return []
-
         return recommendations
 
     except Exception as e:
         print("Wystąpił błąd podczas generowania rekomendacji:", e)
         return []
 
+def content_based_recommendation(user_id):
+    """
+    Generuje rekomendacje dla zalogowanego użytkownika na podstawie treści filmów i jego ocen.
+    Zwraca listę obiektów Movie.
+    """
+    try:
+        # Pobierz oceny użytkownika
+        user_ratings = Rating.objects.filter(user_id=user_id)
+        if not user_ratings.exists():
+            return []
+
+        # Tworzenie profilu użytkownika
+        rated_movies = Movie.objects.filter(rating__user_id=user_id)
+        rated_movies_df = pd.DataFrame(list(rated_movies.values('id', 'title', 'description')))
+
+        # Przygotuj dane o wszystkich filmach
+        all_movies = Movie.objects.all()
+        all_movies_df = pd.DataFrame(list(all_movies.values('id', 'title', 'description')))
+
+        # Dodaj kolumnę z cechami (gatunki, słowa kluczowe, obsada, reżyserzy)
+        all_movies_df['features'] = all_movies_df['id'].apply(
+            lambda x: get_movie_features(Movie.objects.get(id=x))
+        )
+
+        # Przygotuj macierz TF-IDF
+        tfidf = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf.fit_transform(all_movies_df['features'])
+
+        # Oblicz wektor profilu użytkownika
+        user_profile = np.zeros(tfidf_matrix.shape[1])
+        for rating in user_ratings:
+            movie = Movie.objects.get(id=rating.movie_id)
+            idx = all_movies_df[all_movies_df['id'] == movie.id].index[0]
+            user_profile += tfidf_matrix[idx].toarray().flatten() * rating.score
+
+        # Oblicz podobieństwo kosinusowe między profilem użytkownika a wszystkimi filmami
+        cosine_similarities = linear_kernel(user_profile.reshape(1, -1), tfidf_matrix).flatten()
+
+        # Filmy już ocenione przez użytkownika
+        rated_movie_ids = set(user_ratings.values_list('movie_id', flat=True))
+
+        # Posortuj filmy według podobieństwa
+        similar_indices = cosine_similarities.argsort()[::-1]
+        recommendations = []
+        for idx in similar_indices:
+            movie_id = all_movies_df.iloc[idx]['id']
+            if movie_id not in rated_movie_ids:
+                movie = Movie.objects.get(id=movie_id)
+                recommendations.append(movie)
+            if len(recommendations) >= 5:
+                break
+
+        return recommendations
+
+    except Exception as e:
+        print("Wystąpił błąd podczas generowania rekomendacji opartych na treści:", e)
+        return []
+
+def recommend_movies(user_id):
+    """
+    Generuje hybrydowe rekomendacje dla zalogowanego użytkownika, łącząc filtrację kolaboratywną i rekomendacje oparte na treści.
+    Nadaje im odpowiednie wagi i zwraca listę obiektów Movie.
+    """
+    # Rekomendacje z filtracji kolaboratywnej
+    collaborative_recommendations = matrix_factorization_recommendation(user_id)
+
+    # Rekomendacje oparte na treści
+    content_recommendations = content_based_recommendation(user_id)
+
+    # Połącz rekomendacje, nadając im wagi
+    recommendation_scores = {}
+
+    # Ustal wagi
+    weight_collaborative = 0.5
+    weight_content = 0.5
+
+    # Przetwórz rekomendacje z filtracji kolaboratywnej
+    for idx, movie in enumerate(collaborative_recommendations):
+        score = (len(collaborative_recommendations) - idx) * weight_collaborative
+        recommendation_scores[movie.id] = recommendation_scores.get(movie.id, 0) + score
+
+    # Przetwórz rekomendacje oparte na treści
+    for idx, movie in enumerate(content_recommendations):
+        score = (len(content_recommendations) - idx) * weight_content
+        recommendation_scores[movie.id] = recommendation_scores.get(movie.id, 0) + score
+
+    # Posortuj filmy według skumulowanego wyniku
+    sorted_movie_ids = sorted(recommendation_scores, key=recommendation_scores.get, reverse=True)
+
+    # Pobierz obiekty Movie
+    recommendations = [Movie.objects.get(id=movie_id) for movie_id in sorted_movie_ids[:5]]
+
+    return recommendations
+
+# -------------------------- #
+#   Funkcje Pomocnicze      #
+# -------------------------- #
+
+def get_new_ratings_count():
+    """
+    Zwraca liczbę nowych ocen od ostatniego retrenowania modelu.
+    """
+    if os.path.exists(MODEL_NEW_RATINGS_COUNT_PATH):
+        with open(MODEL_NEW_RATINGS_COUNT_PATH, 'r') as f:
+            try:
+                count = int(f.read())
+                return count
+            except ValueError:
+                return 0
+    else:
+        return 0
+
+def increment_new_ratings_count():
+    """
+    Inkrementuje licznik nowych ocen i zapisuje go do pliku.
+    Zwraca zaktualizowaną wartość.
+    """
+    count = get_new_ratings_count() + 1
+    with open(MODEL_NEW_RATINGS_COUNT_PATH, 'w') as f:
+        f.write(str(count))
+    return count
+
+def reset_new_ratings_count():
+    """
+    Resetuje licznik nowych ocen do zera.
+    """
+    with open(MODEL_NEW_RATINGS_COUNT_PATH, 'w') as f:
+        f.write('0')
+
 def update_model_with_new_rating(user_id, movie_id, rating):
+    """
+    Aktualizuje model rekomendacji na podstawie nowej oceny użytkownika.
+    Inkrementuje licznik nowych ocen i trenuje model ponownie, jeśli próg został osiągnięty.
+    """
     # Inkrementuj licznik nowych ocen
     new_ratings_count = increment_new_ratings_count()
 
@@ -293,378 +433,69 @@ def update_model_with_new_rating(user_id, movie_id, rating):
     with open(MODEL_MAPPINGS_PATH, 'w') as f:
         json.dump(model_mappings, f)
 
-    print("Model został zaktualizowany i zapisany.")
+    print(f"Model został zaktualizowany z nową oceną: User ID={user_id}, Movie ID={movie_id}, Rating={rating}")
 
     # Sprawdź, czy osiągnięto próg nowych ocen do retrenowania
     if new_ratings_count >= NEW_RATINGS_THRESHOLD:
-        print(f"Osiągnięto {NEW_RATINGS_THRESHOLD} nowych ocen. Retrenowanie modelu...")
+        print(f"Osiągnięto {NEW_RATINGS_THRESHOLD} nowych ocen. Rozpoczynam retrenowanie modelu.")
         train_matrix_factorization_model()
-
-def content_based_recommendation(user_id):
-    try:
-        # Pobierz oceny użytkownika
-        user_ratings = Rating.objects.filter(user_id=user_id)
-        if not user_ratings.exists():
-            print("Użytkownik nie ma żadnych ocen.")
-            return []
-
-        # Tworzenie profilu użytkownika
-        # Zbierz informacje o filmach ocenionych przez użytkownika
-        rated_movies = Movie.objects.filter(rating__user_id=user_id)
-        rated_movies_df = pd.DataFrame(list(rated_movies.values('id', 'title', 'description')))
-
-        # Przygotuj dane o wszystkich filmach
-        all_movies = Movie.objects.all()
-        all_movies_df = pd.DataFrame(list(all_movies.values('id', 'title', 'description')))
-
-        # Dodaj kolumnę z cechami (gatunki, słowa kluczowe, obsada, reżyserzy)
-        all_movies_df['features'] = all_movies_df['id'].apply(
-            lambda x: get_movie_features(Movie.objects.get(id=x))
-        )
-
-        # Przygotuj macierz TF-IDF
-        tfidf = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = tfidf.fit_transform(all_movies_df['features'])
-
-        # Oblicz wektor profilu użytkownika
-        user_profile = np.zeros(tfidf_matrix.shape[1])
-        for rating in user_ratings:
-            movie = Movie.objects.get(id=rating.movie_id)
-            idx = all_movies_df[all_movies_df['id'] == movie.id].index[0]
-            user_profile += tfidf_matrix[idx].toarray().flatten() * rating.score
-
-        # Oblicz podobieństwo kosinusowe między profilem użytkownika a wszystkimi filmami
-        cosine_similarities = linear_kernel(user_profile.reshape(1, -1), tfidf_matrix).flatten()
-
-        # Filmy już ocenione przez użytkownika
-        rated_movie_ids = set(user_ratings.values_list('movie_id', flat=True))
-
-        # Posortuj filmy według podobieństwa
-        similar_indices = cosine_similarities.argsort()[::-1]
-        recommendations = []
-        for idx in similar_indices:
-            movie_id = all_movies_df.iloc[idx]['id']
-            if movie_id not in rated_movie_ids:
-                movie = Movie.objects.get(id=movie_id)
-                recommendations.append(movie)
-            if len(recommendations) >= 5:
-                break
-
-        if not recommendations:
-            print("Brak rekomendacji opartych na treści dla tego użytkownika.")
-            return []
-
-        return recommendations
-
-    except Exception as e:
-        print("Wystąpił błąd podczas generowania rekomendacji opartych na treści:", e)
-        return []
-
-def recommend_movies_for_user(user):
-    # Rekomendacje z filtracji kolaboratywnej
-    collaborative_recommendations = matrix_factorization_recommendation(user.id)
-
-    # Rekomendacje oparte na treści
-    content_recommendations = content_based_recommendation(user.id)
-
-    # Połącz rekomendacje, nadając im wagi
-    recommendation_scores = {}
-
-    # Ustal wagi
-    weight_collaborative = 0.5
-    weight_content = 0.5
-
-    # Przetwórz rekomendacje z filtracji kolaboratywnej
-    for idx, movie in enumerate(collaborative_recommendations):
-        score = (len(collaborative_recommendations) - idx) * weight_collaborative
-        recommendation_scores[movie.id] = recommendation_scores.get(movie.id, 0) + score
-
-    # Przetwórz rekomendacje oparte na treści
-    for idx, movie in enumerate(content_recommendations):
-        score = (len(content_recommendations) - idx) * weight_content
-        recommendation_scores[movie.id] = recommendation_scores.get(movie.id, 0) + score
-
-    # Posortuj filmy według skumulowanego wyniku
-    sorted_movie_ids = sorted(recommendation_scores, key=recommendation_scores.get, reverse=True)
-
-    # Pobierz obiekty Movie
-    recommendations = [Movie.objects.get(id=movie_id) for movie_id in sorted_movie_ids[:5]]
-
-    if recommendations:
-        print(f"Rekomendacje dla {user.username}:")
-        for idx, movie in enumerate(recommendations, start=1):
-            print(f"{idx}. {movie.title}")
-        # Zapytaj użytkownika, czy chce ocenić rekomendacje
-        print("\nCzy chciałbyś ocenić któreś z powyższych filmów? Twoje oceny pomogą nam w lepszym dopasowywaniu filmów w przyszłości.")
-        rate_choice = input("Wpisz 'tak' aby ocenić filmy lub naciśnij Enter aby kontynuować: ").lower()
-        if rate_choice == 'tak':
-            rate_recommendations(user, recommendations)
     else:
-        print(f"Brak rekomendacji dla użytkownika {user.username}.")
+        print(f"Liczba nowych ocen: {new_ratings_count}/{NEW_RATINGS_THRESHOLD}")
 
-def rate_recommendations(user, recommendations):
-    for movie in recommendations:
-        while True:
-            rate = input(f"Czy chciałbyś ocenić film '{movie.title}'? (tak/pomiń): ").lower()
-            if rate == 'tak':
-                score = input("Podaj ocenę filmu (1-10): ")
-                try:
-                    score = int(score)
-                    if 1 <= score <= 10:
-                        # Zapisz ocenę w tabeli Rating
-                        rating, created = Rating.objects.update_or_create(
-                            user=user, movie=movie,
-                            defaults={'score': score, 'comment': 'Ocena rekomendacji'}
-                        )
-                        # Aktualizuj model
-                        update_model_with_new_rating(user.id, movie.id, score)
-                        print(f"Dziękujemy za ocenę filmu '{movie.title}'.")
-                        break
-                    else:
-                        print("Ocena musi być w przedziale 1-10.")
-                except ValueError:
-                    print("Ocena musi być liczbą całkowitą.")
-            elif rate == 'pomiń' or rate == '':
-                print(f"Pominięto ocenę filmu '{movie.title}'.")
-                break
-            else:
-                print("Nie zrozumiałem odpowiedzi. Proszę wpisać 'tak' lub 'pomiń'.")
-
-# Pozostałe funkcje
-def recommend_movies_for_new_user():
-    recommendations = knn_recommendation()
-    if recommendations:
-        print("Rekomendacje dla nowego użytkownika:")
-        for idx, movie in enumerate(recommendations, start=1):
-            print(f"{idx}. {movie.title}")
-    else:
-        print("Brak rekomendacji dla nowego użytkownika.")
-
-def select_user():
-    username = input("Podaj nazwę użytkownika: ")
-    try:
-        user = User.objects.get(username=username)
-        print(f"Zalogowano jako: {user.username}")
-        return user
-    except User.DoesNotExist:
-        print("Użytkownik nie istnieje.")
-        return None
-
-def show_movie_data():
-    movie_title = input("Podaj tytuł filmu: ")
-    movies = Movie.objects.filter(title=movie_title)
-    if not movies.exists():
-        print("Film nie został znaleziony.")
-        return
-    elif movies.count() == 1:
-        movie = movies.first()
-    else:
-        print("Znaleziono kilka filmów o tym tytule:")
-        for idx, m in enumerate(movies, start=1):
-            print(f"{idx}. {m.title} ({m.release_year})")
-        choice = input("Wybierz numer filmu: ")
-        try:
-            movie_idx = int(choice) - 1
-            if 0 <= movie_idx < movies.count():
-                movie = movies[movie_idx]
-            else:
-                print("Nieprawidłowy wybór.")
-                return
-        except ValueError:
-            print("Nieprawidłowy wybór.")
-            return
-    print(f"Tytuł: {movie.title}")
-    print(f"Rok wydania: {movie.release_year}")
-    print(f"Opis: {movie.description}")
-    print(f"Gatunki: {', '.join([genre.name for genre in movie.genres.all()])}")
-    print(f"Słowa kluczowe: {', '.join([keyword.name for keyword in movie.keywords.all()])}")
-    print(f"Obsada: {', '.join([member.name for member in movie.cast.all()])}")
-    print(f"Reżyserzy: {', '.join([director.name for director in movie.directors.all()])}")
-
-def add_movie_to_favorites(user):
-    movie_title = input("Podaj tytuł filmu do dodania do ulubionych: ")
-    movies = Movie.objects.filter(title=movie_title)
-    if not movies.exists():
-        print("Film nie został znaleziony.")
-        return
-    elif movies.count() == 1:
-        movie = movies.first()
-    else:
-        print("Znaleziono kilka filmów o tym tytule:")
-        for idx, m in enumerate(movies, start=1):
-            print(f"{idx}. {m.title} ({m.release_year})")
-        choice = input("Wybierz numer filmu: ")
-        try:
-            movie_idx = int(choice) - 1
-            if 0 <= movie_idx < movies.count():
-                movie = movies[movie_idx]
-            else:
-                print("Nieprawidłowy wybór.")
-                return
-        except ValueError:
-            print("Nieprawidłowy wybór.")
-            return
-    favorite, created = FavoriteMovie.objects.get_or_create(user=user, movie=movie)
-    if created:
-        print(f"Film '{movie.title}' został dodany do ulubionych.")
-        # Traktujemy dodanie do ulubionych jako pozytywną ocenę
-        default_score = 8  # Możesz dostosować domyślną ocenę
-        rating, created_rating = Rating.objects.update_or_create(
-            user=user, movie=movie,
-            defaults={'score': default_score, 'comment': 'Dodano do ulubionych'}
-        )
-        # Aktualizuj model
-        update_model_with_new_rating(user.id, movie.id, default_score)
-    else:
-        print(f"Film '{movie.title}' jest już w ulubionych.")
-
-def add_rating(user):
-    movie_title = input("Podaj tytuł filmu do oceny: ")
-    movies = Movie.objects.filter(title=movie_title)
-    if not movies.exists():
-        print("Film nie został znaleziony.")
-        return
-    elif movies.count() == 1:
-        movie = movies.first()
-    else:
-        print("Znaleziono kilka filmów o tym tytule:")
-        for idx, m in enumerate(movies, start=1):
-            print(f"{idx}. {m.title} ({m.release_year})")
-        choice = input("Wybierz numer filmu: ")
-        try:
-            movie_idx = int(choice) - 1
-            if 0 <= movie_idx < movies.count():
-                movie = movies[movie_idx]
-            else:
-                print("Nieprawidłowy wybór.")
-                return
-        except ValueError:
-            print("Nieprawidłowy wybór.")
-            return
-    try:
-        score = int(input("Podaj ocenę (1-10): "))
-        if score < 1 or score > 10:
-            print("Ocena musi być w przedziale 1-10.")
-            return
-    except ValueError:
-        print("Ocena musi być liczbą całkowitą.")
-        return
-    comment = input("Dodaj komentarz (opcjonalnie): ")
-    rating, created = Rating.objects.update_or_create(
-        user=user, movie=movie,
-        defaults={'score': score, 'comment': comment}
-    )
-    print(f"Ocena została {'dodana' if created else 'zaktualizowana'}.")
-
-    # Aktualizuj model na podstawie nowej oceny
-    update_model_with_new_rating(user.id, movie.id, score)
-
-def show_user_favorites(user):
-    favorites = FavoriteMovie.objects.filter(user=user)
-    if favorites.exists():
-        print(f"Ulubione filmy użytkownika {user.username}:")
-        for favorite in favorites:
-            print(f"- {favorite.movie.title}")
-    else:
-        print(f"Użytkownik {user.username} nie ma żadnych ulubionych filmów.")
-
-def show_user_ratings(user):
-    ratings = Rating.objects.filter(user=user)
-    if ratings.exists():
-        print(f"Oceny przesłane przez użytkownika {user.username}:")
-        for rating in ratings:
-            print(f"- {rating.movie.title}: {rating.score}/10")
-            if rating.comment:
-                print(f"  Komentarz: {rating.comment}")
-    else:
-        print(f"Użytkownik {user.username} nie dodał żadnych ocen.")
-
-def user_menu(user):
-    while True:
-        print(f"\n--- Menu użytkownika: {user.username} ---")
-        print("1. Zarekomenduj filmy dla użytkownika")
-        print("2. Pokaż ulubione filmy użytkownika")
-        print("3. Pokaż oceny przesłane przez użytkownika")
-        print("4. Dodaj film do ulubionych")
-        print("5. Dodaj ocenę")
-        print("6. Wyloguj")
-        choice = input("Wybierz opcję (1-6): ")
-
-        if choice == '1':
-            recommend_movies_for_user(user)
-        elif choice == '2':
-            show_user_favorites(user)
-        elif choice == '3':
-            show_user_ratings(user)
-        elif choice == '4':
-            add_movie_to_favorites(user)
-        elif choice == '5':
-            add_rating(user)
-        elif choice == '6':
-            print(f"Wylogowano użytkownika {user.username}")
-            break
+def update_model_with_new_recommendation_feedback(user_id, movie_ids, score):
+    """
+    Aktualizuje model rekomendacji na podstawie oceny całej rekomendacji.
+    """
+    # Przypisujemy ocenę do każdego filmu w rekomendacji
+    for movie_id in movie_ids:
+        # Jeśli użytkownik jest zalogowany, przypisujemy ocenę do jego profilu
+        if user_id:
+            rating, created = Rating.objects.update_or_create(
+                user_id=user_id,
+                movie_id=movie_id,
+                defaults={'score': score}
+            )
+            update_model_with_new_rating(user_id, movie_id, score)
         else:
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
+            # Dla niezalogowanych użytkowników możemy przypisać ocenę anonimową
+            anonymous_user, _ = User.objects.get_or_create(username='Anonymous', defaults={'password': 'anonymous'})
+            rating, created = Rating.objects.update_or_create(
+                user=anonymous_user,
+                movie_id=movie_id,
+                defaults={'score': score}
+            )
+            update_model_with_new_rating(anonymous_user.id, movie_id, score)
 
-def show_newest_movies():
-    movies = Movie.objects.all().order_by('-release_year')[:5]
-    if movies:
-        print("5 najnowszych filmów:")
-        for movie in movies:
-            print(f"- {movie.title} ({movie.release_year})")
-    else:
-        print("Brak filmów w bazie danych.")
+# -------------------------- #
+#    Funkcje Zarządzania     #
+# -------------------------- #
 
-def show_top_rated_movies():
-    movies = Movie.objects.annotate(avg_rating=Avg('rating__score')).order_by('-avg_rating')[:5]
-    if movies:
-        print("5 filmów z najlepszą średnią ocen:")
-        for movie in movies:
-            avg_rating = movie.avg_rating if movie.avg_rating else 0
-            print(f"- {movie.title} - Średnia ocena: {avg_rating:.2f}")
-    else:
-        print("Brak ocenionych filmów w bazie danych.")
+def reset_model():
+    """
+    Usuwa pliki modelu i resetuje liczniki.
+    """
+    for file_path in [MODEL_USER_FACTORS_PATH, MODEL_MOVIE_FACTORS_PATH, MODEL_MAPPINGS_PATH, MODEL_NEW_RATINGS_COUNT_PATH]:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    print("Model oraz liczniki zostały zresetowane.")
 
-def show_most_rated_movies():
-    movies = Movie.objects.annotate(rating_count=Count('rating')).order_by('-rating_count')[:5]
-    if movies:
-        print("5 filmów z największą liczbą ocen:")
-        for movie in movies:
-            print(f"- {movie.title} - Liczba ocen: {movie.rating_count}")
-    else:
-        print("Brak ocenionych filmów w bazie danych.")
+def get_top_rated_movies(n=5):
+    """
+    Zwraca listę top n najlepiej ocenianych filmów na podstawie średniej oceny.
+    """
+    top_movies = Movie.objects.annotate(avg_rating=Avg('rating__score')).order_by('-avg_rating')[:n]
+    return top_movies
 
-def main():
-    while True:
-        print("\n--- Menu ---")
-        print("1. Zarekomenduj 5 filmów dla nowego użytkownika")
-        print("2. Pokaż 5 najnowszych filmów")
-        print("3. Pokaż 5 filmów z najlepszą średnią ocen")
-        print("4. Pokaż 5 filmów z największą liczbą ocen")
-        print("5. Zaloguj się jako użytkownik")
-        print("6. Pokaż dane filmu")
-        print("7. Koniec")
-        choice = input("Wybierz opcję (1-7): ")
+def get_newest_movies(n=5):
+    """
+    Zwraca listę n najnowszych filmów na podstawie roku wydania.
+    """
+    newest_movies = Movie.objects.all().order_by('-release_year')[:n]
+    return newest_movies
 
-        if choice == '1':
-            recommend_movies_for_new_user()
-        elif choice == '2':
-            show_newest_movies()
-        elif choice == '3':
-            show_top_rated_movies()
-        elif choice == '4':
-            show_most_rated_movies()
-        elif choice == '5':
-            user = select_user()
-            if user:
-                user_menu(user)
-        elif choice == '6':
-            show_movie_data()
-        elif choice == '7':
-            print("Do widzenia!")
-            break
-        else:
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
-
-if __name__ == '__main__':
-    main()
+def get_most_rated_movies(n=5):
+    """
+    Zwraca listę n filmów z największą liczbą ocen.
+    """
+    most_rated_movies = Movie.objects.annotate(rating_count=Count('rating')).order_by('-rating_count')[:n]
+    return most_rated_movies

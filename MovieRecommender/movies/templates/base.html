@@ -1,43 +1,50 @@
-<!-- movies/templates/base.html -->
+<!-- base.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
     <title>Movie Recommender</title>
+    <!-- Link do Bootstrap CSS (opcjonalnie, jeśli chcesz używać Bootstrap) -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
+    <!-- Twój własny CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <header>
-        <h1>Movie Recommender</h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Strona główna</a></li>
+    <nav>
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Movie Recommender</a>
+            <ul class="navbar-nav">
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'user_recommendations' %}">Twoje rekomendacje</a></li>
-                    <li><a href="{% url 'logout' %}">Wyloguj</a></li>
+                    <li>
+                        <a href="{% url 'user_profile' %}">Moje Konto</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'logout' %}">Wyloguj się</a>
+                    </li>
                 {% else %}
-                    <li><a href="{% url 'guest_recommendations' %}">Rekomendacje</a></li>
-                    <li><a href="{% url 'login' %}">Zaloguj</a></li>
-                    <li><a href="{% url 'register' %}">Zarejestruj się</a></li>
+                    <li>
+                        <a href="{% url 'login' %}">Logowanie</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'register' %}">Rejestracja</a>
+                    </li>
                 {% endif %}
             </ul>
-        </nav>
-    </header>
-
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <main>
+        </div>
+    </nav>
+    <div class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         {% block content %}
+        <!-- Specyficzna treść strony -->
         {% endblock content %}
-    </main>
-
+    </div>
     <footer>
         <p>&copy; 2023 Movie Recommender</p>
     </footer>
